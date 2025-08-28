@@ -13,7 +13,7 @@ from conda.plugins import CondaVirtualPackage, hookimpl
 
 @hookimpl
 def conda_virtual_packages():
-    if platform.machine() == "x86_64":
+    if platform.machine() in ("AMD64", "x86_64"):
         from archspec.cpu.detect import CpuidInfoCollector
         cpu = CpuidInfoCollector()
 
