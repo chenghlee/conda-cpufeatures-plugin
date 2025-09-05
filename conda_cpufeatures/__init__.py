@@ -4,6 +4,7 @@ listing them as virtual packages.
 Copyright (C) 2024 Anaconda, Inc.
 """
 
+import os
 import platform
 import struct
 
@@ -13,7 +14,16 @@ from conda.plugins import CondaVirtualPackage, hookimpl
 
 @hookimpl
 def conda_virtual_packages():
-    if platform.machine() in ("AMD64", "x86_64"):
+    if target_cpu := os.getenv("CONDA_OVERRIDE_ARCHSPEC", os.getenv("CONDA_OVERRIDE_CPU")):
+        import archspec.cpu
+        cpu = archspec.cpu.TARGETS.get(target_cpu)
+
+        # TODO: reconsider whether not having the user-specified CPU
+        # microarchitecture in archspec's database should "just" be a warning,
+        # and if so, what a reasonable fallback should be.
+        if not cpu:
+            raise ValueError("unknown CPU type")
+    elif platform.machine() in ("AMD64", "x86_64"):
         from archspec.cpu.detect import CpuidInfoCollector
         cpu = CpuidInfoCollector()
 
